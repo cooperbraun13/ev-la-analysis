@@ -41,6 +41,12 @@ def fetch_cal_raleigh_bbe_csv(
     batted_balls["event_type"] = batted_balls["events"].fillna(batted_balls.get("description", ""))
     batted_balls["is_hit"] = batted_balls["event_type"].str.lower().isin(HIT_EVENTS).astype(int)
 
+    # mark rows whose event label is exactly 'foul' (too many batted ball events were "foul" which may skew data)
+    batted_balls["is_foul"] = batted_balls["event_type"].fillna("").astype(str).str.strip().str.lower() == "foul"
+
+    # remove fouls from the set of batted-ball events so they arent counted in the output
+    batted_balls = batted_balls[~batted_balls["is_foul"]].copy()
+
     # sort latest first (use pitch_number as a tie-breaker if present)
     sort_cols = ["game_date"]
     if "pitch_number" in batted_balls.columns:
