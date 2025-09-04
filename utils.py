@@ -5,9 +5,9 @@ minimal helper for pulling cal raleigh batted-ball events with pybaseball and wr
 import pandas as pd
 from pybaseball import statcast_batter
 
-HIT_EVENTS = {"single", "double", "triple", "home_run"}
+hit_events = {"single", "double", "triple", "home_run"}
 # mlbam id for cal raleigh
-CAL_RALEIGH_ID = 663728
+cal_raleigh_id = 663728
 
 def fetch_cal_raleigh_bbe_csv(
     start_date: str = "2025-05-01",
@@ -20,7 +20,7 @@ def fetch_cal_raleigh_bbe_csv(
     sort newest to oldest, take up to "max_rows", and write to "output_csv". returns the dataframe.
     """
     # query batter-specific statcast data
-    raw_data = statcast_batter(start_dt=start_date, end_dt=end_date, player_id=CAL_RALEIGH_ID)
+    raw_data = statcast_batter(start_dt=start_date, end_dt=end_date, player_id=cal_raleigh_id)
 
     # if no data or something goes wrong, still create an empty csv with expected columns and return
     if raw_data is None or raw_data.empty:
@@ -39,7 +39,7 @@ def fetch_cal_raleigh_bbe_csv(
 
     # create a cleaner event label and a binary hit flag (1 is a hit, 0 is not a hit)
     batted_balls["event_type"] = batted_balls["events"].fillna(batted_balls.get("description", ""))
-    batted_balls["is_hit"] = batted_balls["event_type"].str.lower().isin(HIT_EVENTS).astype(int)
+    batted_balls["is_hit"] = batted_balls["event_type"].str.lower().isin(hit_events).astype(int)
 
     # mark rows whose event label is exactly 'foul' (too many batted ball events were "foul" which may skew data)
     batted_balls["is_foul"] = batted_balls["event_type"].fillna("").astype(str).str.strip().str.lower() == "foul"
